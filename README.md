@@ -25,6 +25,9 @@ Example:
 编译器: Visual Studio Express 2015 for Windows Desktop
 
   ```
+
+-------
+```C++
 batch2pdf -help
   Usage: batch2pdf command...
    -d 要批量转PDF的目录
@@ -36,6 +39,6 @@ batch2pdf -help
    -s 字体大小,默认为14
    -b 页尾字体大小,默认为10
    -h 命令说明
-
+  ```
 pdf文件效果:
   ![](https://raw.githubusercontent.com/xcltapestry/batch2pdf/master/sample/batch2pdf.png)
