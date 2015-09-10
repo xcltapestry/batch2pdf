@@ -16,20 +16,20 @@ namespace pdf {
 
 	namespace config {
 
-		void SetConfigLanguage(config::LANGUAGE langType) {
+		void SetConfigLanguage(const config::LANGUAGE langType) {
 			LANG_TYPE = langType;
 		}
 
-		void SetConfigPageLineNum(int pageLineNum) {
+		void SetConfigPageLineNum(const int pageLineNum) {
 			PAGE_LINENUM = pageLineNum;
 		}
-		void SetConfigLineHeight(int lineHeight) {
+		void SetConfigLineHeight(const int lineHeight) {
 			LINE_HEIGHT = lineHeight;
 		}
-		void SetConfigPageFontSize(int pageFontSize) {
+		void SetConfigPageFontSize(const int pageFontSize) {
 			PAGE_FONT_SIZE = pageFontSize;
 		}
-		void SetConfigFootbarFontSize(int footbarFontSize) {
+		void SetConfigFootbarFontSize(const int footbarFontSize) {
 			FOOTBAR_FONT_SIZE = footbarFontSize;
 		}
 
@@ -137,9 +137,7 @@ namespace pdf {
 				int pageNum = util::calcPageNum(vec.size());
 				for (int i = 0; i < pageNum; i++) {
 					page = HPDF_AddPage(pdf);					
-					if (i == 0)func_pageOutline(page,curFile);
-								
-					HPDF_Page_SetFontAndSize(page, font, 22);
+					if (i == 0)func_pageOutline(page,curFile);								
 					HPDF_Page_SetSize(page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
 
 					HPDF_REAL height = HPDF_Page_GetHeight(page);

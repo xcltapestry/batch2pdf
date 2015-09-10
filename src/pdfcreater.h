@@ -34,10 +34,10 @@ namespace pdf {
 		static int PAGE_FONT_SIZE = 14; // const HPDF_REAL
 		static int FOOTBAR_FONT_SIZE = 10;
 
-		void SetConfigPageLineNum(int pageLineNum);
-		void SetConfigLineHeight(int lineHeight);
-		void SetConfigPageFontSize(int pageFontSize);
-		void SetConfigFootbarFontSize(int footbarFontSize);
+		void SetConfigPageLineNum(const int pageLineNum);
+		void SetConfigLineHeight(const int lineHeight);
+		void SetConfigPageFontSize(const int pageFontSize);
+		void SetConfigFootbarFontSize(const int footbarFontSize);
 
 		static const int ROWID_WIDTH = 5;
 		static const int TEXT_INDENT = 5;   // ×ó±ßËõ½ø

@@ -26,7 +26,7 @@ Example:
 
 #if defined(_WIN32) || defined(_WIN64)
 	#pragma comment(lib,"..\\x64\\Release\\LIBHPDF.lib")
-	#pragma warning (disable: 4996)  //_s   //declared deprecated ?
+	#pragma warning (disable: 4996)  
 #endif
 
 static void Usage() {
