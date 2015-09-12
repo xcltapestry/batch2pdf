@@ -26,8 +26,16 @@ namespace pdf {
 			TW = 2
 		};
 
+		enum CONVERT {
+			NORMAL = 0,
+			UTF8TOGBK = 1
+		};
+
 		static LANGUAGE LANG_TYPE = LANGUAGE::CN;
 		void SetConfigLanguage(config::LANGUAGE langType);
+
+		static CONVERT CONVERT_TYPE = CONVERT::NORMAL;
+		void SetConfigConvert(config::CONVERT convertType);
 
 		static int PAGE_LINENUM = 53;  //一页可显示的总行数
 		static int LINE_HEIGHT = 15;  //行高	

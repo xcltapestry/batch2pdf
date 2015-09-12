@@ -10,6 +10,8 @@
 #include <setjmp.h>
 #include "hpdf.h"
 
+#include <windows.h>
+
 namespace fs = std::experimental::filesystem;
 
 namespace pdf {
@@ -18,6 +20,10 @@ namespace pdf {
 
 		void SetConfigLanguage(const config::LANGUAGE langType) {
 			LANG_TYPE = langType;
+		}
+
+		void SetConfigConvert(config::CONVERT convertType) {
+			CONVERT_TYPE = convertType;
 		}
 
 		void SetConfigPageLineNum(const int pageLineNum) {
@@ -41,7 +47,7 @@ namespace pdf {
 			std::stringstream buffer(s);
 			std::vector<std::string> vec;
 			std::string ln;
-
+		
 			while (std::getline(buffer, ln, delim)) {
 				vec.push_back(ln);
 			}
@@ -64,6 +70,21 @@ namespace pdf {
 			return files;
 		}
 
+		void ConvertUtf8ToGBK(std::string& strGBK, std::string strUtf8)
+		{
+			int len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)strUtf8.c_str(), -1, NULL, 0);
+			unsigned short * wszGBK = new unsigned short[len + 1];
+			memset(wszGBK, 0, len * 2 + 2);
+			MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)strUtf8.c_str(), -1, (LPWSTR)wszGBK, len);
+			len = WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)wszGBK, -1, NULL, 0, NULL, NULL);
+			char *szGBK = new char[len + 1];
+			memset(szGBK, 0, len + 1);
+			WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)wszGBK, -1, szGBK, len, NULL, NULL);
+			strGBK = szGBK;
+			delete[] szGBK;
+			delete[] wszGBK;
+		}
+
 		std::string getFileContents(const std::string fileName) noexcept{
 			std::ifstream infile;
 			infile.open(fileName);
@@ -74,7 +95,15 @@ namespace pdf {
 			infile.close();
 			infile.clear();
 
-			return (buffer.str());
+			if (config::CONVERT_TYPE == config::CONVERT::UTF8TOGBK) {
+				std::string g;
+				std::string x = buffer.str();
+				ConvertUtf8ToGBK(g, x);
+				return g;
+			}
+			else {
+				return (buffer.str());
+			}
 		}
 		
 		int calcPageNum(const int total) {
@@ -118,9 +147,9 @@ namespace pdf {
 					 const std::vector< std::string> vec) {
 					
 			auto func_footbar = [](std::string fileName)->std::string {
-				std::ostringstream os;				
-				os << "  File:" << fileName.c_str() <<"   Autor:XCL ";
-				return os.str();
+				std::ostringstream buffer;				
+				buffer << "  File:" << fileName.c_str() <<"   Autor:XCL ";
+				return buffer.str();
 			};
 
 			auto func_pageOutline = [&](HPDF_Page page,std::string curFile){
@@ -152,7 +181,7 @@ namespace pdf {
 						HPDF_Page_MoveTo(page, 0, 13);
 						HPDF_Page_LineTo(page, width, 16);
 						HPDF_Page_Stroke(page);
-
+						
 						HPDF_Page_SetRGBFill(page, 0.0, 0,0.5);
 						HPDF_Page_BeginText(page);						
 						HPDF_Page_MoveTextPos(page, 40, config::FOOTBAR_FONT_SIZE - 5);
@@ -175,7 +204,6 @@ namespace pdf {
 						HPDF_Page_MoveTextPos(page, config::ROWID_WIDTH, y - 2);
 						HPDF_Page_ShowText(page, util::rowidWidth(ln + 1).c_str());
 						HPDF_Page_ShowText(page, vec[ln].c_str());
-
 						HPDF_Page_EndText(page);
 						y -= config::LINE_HEIGHT;
 					} //end for
@@ -204,6 +232,15 @@ namespace pdf {
 				return;
 			}
 
+			/*
+			const char *font_name1;
+			const char *font_name2;
+			const char *font_name3;
+			font_name1 = HPDF_LoadTTFontFromFile(pdf, "C:\\Windows\\Fonts\\Arial.ttf", HPDF_TRUE);
+			font_name2 = HPDF_LoadTTFontFromFile(pdf, R"(C:\Windows\Fonts\simsunb.ttf)", HPDF_TRUE);
+			font_name3 = HPDF_LoadTTFontFromFile2(pdf, "C:\\Windows\\Fonts\\simsun.ttc", 1, HPDF_TRUE);
+			*/
+
 			HPDF_Outline root;
 			root = HPDF_CreateOutline(pdf, NULL, outline.c_str(), NULL);
 			HPDF_Outline_SetOpened(root, HPDF_TRUE);
@@ -216,7 +253,7 @@ namespace pdf {
 			case pdf::config::CN:
 				HPDF_UseCNSFonts(pdf);
 				HPDF_UseCNSEncodings(pdf);
-				font = HPDF_GetFont(pdf, "SimSun", "GB-EUC-H");  // SimSun  SimHei
+				font = HPDF_GetFont(pdf, "SimHei", "GB-EUC-H");  // SimSun  SimHei
 				break;
 			case pdf::config::TW:
 				HPDF_UseCNTFonts(pdf);
@@ -227,6 +264,7 @@ namespace pdf {
 				font = HPDF_GetFont(pdf, "Helvetica", NULL);
 				break;
 			}
+
 			///////////////////////////			
 			std::string contents;
 			std::vector<std::string> vec;

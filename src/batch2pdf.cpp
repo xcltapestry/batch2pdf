@@ -17,9 +17,13 @@ Example:
 	batch2pdf -dD:\soft_c\leveldb-master\ -nleveldb.pdf -cen -oleveldb
 
 	batch2pdf -dD:\soft_c\rocksdb-master\ -nRocksDB源码_20150909.pdf -oRocksDB
+
+	batch2pdf -dE:\soft_c\sim-master\src\ -nsim_2010911.pdf -osim -ccn
+
+	-dD:\cplusSoucecode\pdf\libharu\attach\ -nattach.pdf -ccn -eutf82gbk
 */
 
-
+//#include <cstdlib>
 #include <iostream>
 #include <string>
 #include "pdfcreater.h"
@@ -34,15 +38,16 @@ static void Usage() {
 	fprintf(
 		stderr,
 		"Usage: batch2pdf command...\n"
-		"   -d 要批量转PDF的目录\n"
+		"   -d 要批量转PDF的目录.\n"
 		"   -n pdf文件名称,并会生成在所转目录下.\n"
-		"   -c cn:支持简体,en:仅支持英文,tw:支持繁体\n"
-		"   -o pdf文件中的目标标签名\n"
-		"   -n 一页总行数,默认为53\n"
-		"   -l 每行高度,默认为15\n"
-		"   -s 字体大小,默认为14\n"
-		"   -b 页尾字体大小,默认为10\n"
-		"   -h 命令说明\n"
+		"   -c cn:支持简体,en:仅支持英文,tw:支持繁体.\n"
+		"   -e utf82gbk:utf8编码转gbk编码. 默认不进行编码转换.\n"
+		"   -o pdf文件中的目标标签名.\n"
+		"   -n 一页总行数,默认为53.\n"
+		"   -l 每行高度,默认为15.\n"
+		"   -s 字体大小,默认为14.\n"
+		"   -b 页尾字体大小,默认为10.\n"
+		"   -h 命令说明.\n"
 		);
 }
 
@@ -65,7 +70,7 @@ int main(int argc, char **argv)
 		else if (arg.compare("-n") == 0) {
 			destFileName = argValue;
 		}
-		else if (arg.compare("-f") == 0) {
+		else if (arg.compare("-c") == 0) {
 			if (argValue.compare("en") == 0) {
 			   pdf::config::SetConfigLanguage(pdf::config::LANGUAGE::EN);
 			}
@@ -74,6 +79,11 @@ int main(int argc, char **argv)
 			}
 			else if (argValue.compare("tw") == 0) {
 				pdf::config::SetConfigLanguage(pdf::config::LANGUAGE::TW);
+			}
+		}
+		else if (arg.compare("-e") == 0) {
+			if (argValue.compare("utf82gbk") == 0) {
+				pdf::config::SetConfigConvert(pdf::config::CONVERT::UTF8TOGBK);
 			}
 		}
 		else if (arg.compare("-o") == 0) {
@@ -95,7 +105,7 @@ int main(int argc, char **argv)
 			Usage();
 		}
 	}
-	
+		
 	//批量将目录下的文件生成到一个pdf文件中
 	pdf::merge::FileCreator(path, destFileName, outline);
 		
@@ -104,6 +114,8 @@ int main(int argc, char **argv)
 
 	// 调用方法二
 	//pdf::merge::FileCreator(R"(D:\pdf\demo\)", "zj.pdf", "demo"); 
+
+	//system("pause");
 
 	return 0;
 }
