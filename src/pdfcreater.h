@@ -37,13 +37,13 @@ namespace pdf {
 		static CONVERT CONVERT_TYPE = CONVERT::NORMAL;
 		void SetConfigConvert(config::CONVERT convertType);
 
-		static int PAGE_LINENUM = 53;  //一页可显示的总行数
-		static int LINE_HEIGHT = 15;  //行高	
-		static int PAGE_FONT_SIZE = 14; // const HPDF_REAL
+		static int PAGE_ROWNUM = 53;  //一页可显示的总行数
+		static int ROW_HEIGHT = 15;  //行高	
+		static int PAGE_FONT_SIZE = 14;
 		static int FOOTBAR_FONT_SIZE = 10;
 
-		void SetConfigPageLineNum(const int pageLineNum);
-		void SetConfigLineHeight(const int lineHeight);
+		void SetConfigPageRowNum(const int pageNum);
+		void SetConfigRowHeight(const int height);
 		void SetConfigPageFontSize(const int pageFontSize);
 		void SetConfigFootbarFontSize(const int footbarFontSize);
 

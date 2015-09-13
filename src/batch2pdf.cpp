@@ -16,11 +16,8 @@ Example:
 	batch2pdf -dE:\soft_c\wdt-master\ -nwdt.pdf  -owdt_20150909
 	batch2pdf -dD:\soft_c\leveldb-master\ -nleveldb.pdf -cen -oleveldb
 
-	batch2pdf -dD:\soft_c\rocksdb-master\ -nRocksDB源码_20150909.pdf -oRocksDB
-
-	batch2pdf -dE:\soft_c\sim-master\src\ -nsim_2010911.pdf -osim -ccn
-
-	-dD:\cplusSoucecode\pdf\libharu\attach\ -nattach.pdf -ccn -eutf82gbk
+	batch2pdf -dD:\soft_c\rocksdb-master\ -nRocksDB源码_20150909.pdf -oRocksDB	
+	batch2pdf -dD:\soft_c\attach\ -nattach.pdf -ccn -eutf82gbk
 */
 
 //#include <cstdlib>
@@ -90,10 +87,10 @@ int main(int argc, char **argv)
 			outline = argValue;
 		}
 		else if (arg.compare("-n") == 0) {
-			pdf::config::SetConfigPageLineNum(std::stoi(argValue));
+			pdf::config::SetConfigPageRowNum(std::stoi(argValue));
 		}
 		else if (arg.compare("-l") == 0) {
-			pdf::config::SetConfigLineHeight(std::stoi(argValue));
+			pdf::config::SetConfigRowHeight(std::stoi(argValue));
 		}
 		else if (arg.compare("-s") == 0) {
 			pdf::config::SetConfigPageFontSize(std::stoi(argValue));
@@ -115,7 +112,7 @@ int main(int argc, char **argv)
 	// 调用方法二
 	//pdf::merge::FileCreator(R"(D:\pdf\demo\)", "zj.pdf", "demo"); 
 
-	//system("pause");
-
+//	system("pause");
+	
 	return 0;
 }

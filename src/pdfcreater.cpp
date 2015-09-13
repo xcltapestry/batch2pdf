@@ -26,11 +26,11 @@ namespace pdf {
 			CONVERT_TYPE = convertType;
 		}
 
-		void SetConfigPageLineNum(const int pageLineNum) {
-			PAGE_LINENUM = pageLineNum;
+		void SetConfigPageRowNum(const int pageNum) {
+			PAGE_ROWNUM = pageNum;
 		}
-		void SetConfigLineHeight(const int lineHeight) {
-			LINE_HEIGHT = lineHeight;
+		void SetConfigRowHeight(const int height) {
+			ROW_HEIGHT = height;
 		}
 		void SetConfigPageFontSize(const int pageFontSize) {
 			PAGE_FONT_SIZE = pageFontSize;
@@ -107,7 +107,7 @@ namespace pdf {
 		}
 		
 		int calcPageNum(const int total) {
-			int pageLns = config::PAGE_LINENUM;
+			int pageLns = config::PAGE_ROWNUM;
 			if (pageLns == 0 || total == 0 || total < pageLns) return 1;
 			return (total % pageLns != 0) ? total / pageLns + 1 : total / pageLns;
 		} //end calcPageNum
@@ -140,19 +140,21 @@ namespace pdf {
 		}
 		/////////////////////////////////////////////////////////////////
 
+		////////////////////
+
 		int fileWriter(HPDF_Doc  pdf,
-					 HPDF_Outline root, 
-					 HPDF_Font font, 
-					 const std::string curFile, 
-					 const std::vector< std::string> vec) {
-					
+			HPDF_Outline root,
+			HPDF_Font font,
+			const std::string curFile,
+			const std::vector< std::string> vec) {
+
 			auto func_footbar = [](std::string fileName)->std::string {
-				std::ostringstream buffer;				
-				buffer << "  File:" << fileName.c_str() <<"   Autor:XCL ";
+				std::ostringstream buffer;
+				buffer << "  File:" << fileName.c_str() << "   Autor:XCL ";
 				return buffer.str();
 			};
 
-			auto func_pageOutline = [&](HPDF_Page page,std::string curFile){
+			auto func_pageOutline = [&](HPDF_Page page, std::string curFile) {
 				HPDF_Outline outline;
 				HPDF_Destination dst;
 				outline = HPDF_CreateOutline(pdf, root, curFile.c_str(), NULL);
@@ -160,20 +162,35 @@ namespace pdf {
 				HPDF_Destination_SetXYZ(dst, 0, HPDF_Page_GetHeight(page), 1);// 1 = 默认百分比100
 				HPDF_Outline_SetDestination(outline, dst);
 			};
-		
-				HPDF_Page page;							
-				int curID = 0;	
-				int pageNum = util::calcPageNum(vec.size());
-				for (int i = 0; i < pageNum; i++) {
-					page = HPDF_AddPage(pdf);					
-					if (i == 0)func_pageOutline(page,curFile);								
-					HPDF_Page_SetSize(page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
+			
+			auto func_drawRow = [](HPDF_Page page,std::string rid,std::string row,int y ) {
+				HPDF_Page_BeginText(page);
+				HPDF_Page_MoveTextPos(page, config::ROWID_WIDTH, y - 2);
+				HPDF_Page_ShowText(page, rid.c_str());
+				HPDF_Page_ShowText(page, row.c_str());
+				HPDF_Page_EndText(page);
+			};
 
-					HPDF_REAL height = HPDF_Page_GetHeight(page);
-					HPDF_REAL width = HPDF_Page_GetWidth(page);
-					HPDF_UINT x, y;
-				
-				    {
+			HPDF_Page page = nullptr;			
+			HPDF_REAL width,height;		
+			HPDF_UINT y = 0;		//  x =0,
+			int currID = 0, pageID = 0, currRowCount;
+			std::string ss, rid;
+	
+			for (int i = 0; i < vec.size(); i++) {							
+				if (i == 0 || currRowCount >  config::PAGE_ROWNUM) {
+					//////////////////////////////////////////////
+					page = HPDF_AddPage(pdf);
+
+					width = HPDF_Page_GetWidth(page);
+					height = HPDF_Page_GetHeight(page);
+//					x = 0;
+					y = height - config::ROW_HEIGHT;
+
+					func_pageOutline(page, curFile);
+					HPDF_Page_SetSize(page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);															
+
+					{
 						HPDF_RGBColor c = HPDF_Page_GetRGBFill(page);
 						HPDF_Page_SetRGBStroke(page, 0.0, 0.5, 0);
 						HPDF_Page_SetFontAndSize(page, font, config::FOOTBAR_FONT_SIZE);
@@ -181,37 +198,48 @@ namespace pdf {
 						HPDF_Page_MoveTo(page, 0, 13);
 						HPDF_Page_LineTo(page, width, 16);
 						HPDF_Page_Stroke(page);
-						
-						HPDF_Page_SetRGBFill(page, 0.0, 0,0.5);
-						HPDF_Page_BeginText(page);						
+
+						HPDF_Page_SetRGBFill(page, 0.0, 0, 0.5);
+						HPDF_Page_BeginText(page);
 						HPDF_Page_MoveTextPos(page, 40, config::FOOTBAR_FONT_SIZE - 5);
 						HPDF_Page_ShowText(page, func_footbar(curFile).c_str());
-						HPDF_Page_EndText(page);					
+						HPDF_Page_EndText(page);
 						HPDF_Page_SetRGBFill(page, c.r, c.g, c.b);
 					};
-
-					HPDF_Page_SetFontAndSize(page, font, config::PAGE_FONT_SIZE); 
-
-					x = 0;
-					y = height - config::LINE_HEIGHT;
-					int ln = 0;
-					for (ln = curID; ln < curID + config::PAGE_LINENUM; ln++) {
-
-						if (ln == vec.size())break;
-						if (ln == curID) y = height - config::LINE_HEIGHT * 2;
 					
-						HPDF_Page_BeginText(page);
-						HPDF_Page_MoveTextPos(page, config::ROWID_WIDTH, y - 2);
-						HPDF_Page_ShowText(page, util::rowidWidth(ln + 1).c_str());
-						HPDF_Page_ShowText(page, vec[ln].c_str());
-						HPDF_Page_EndText(page);
-						y -= config::LINE_HEIGHT;
-					} //end for
-					curID = ln;
+					y = height - config::ROW_HEIGHT * 2;
+					HPDF_Page_SetFontAndSize(page, font, config::PAGE_FONT_SIZE);
+					pageID++;
+					currRowCount = 1;
+					//////////////////////////////////////////////
 				}
-
+												
+				///////////////////////////////////////////			
+				 ss = vec[i];
+				 HPDF_REAL wrid = HPDF_Page_TextWidth(page, rid.c_str());
+			 NEWROW:			
+				 HPDF_REAL wss = HPDF_Page_TextWidth(page, ss.c_str());			
+				 rid = util::rowidWidth(currRowCount );
+				 if (wrid + wss >  width) {
+					 //简单处理:超过页宽，直接分成两行.足以应付大部份情况.
+					 int center = ss.length() / 2;		 
+					 func_drawRow(page, rid,ss.substr(0, center),y);
+					 y -= config::ROW_HEIGHT;
+					 currRowCount++;
+					 ss = ss.substr(center);
+					 goto NEWROW;
+				 }
+				 else {			
+					func_drawRow(page, rid, ss,y);				
+					y -= config::ROW_HEIGHT;		
+					currRowCount++;
+				 }
+				//////////////////////////////////////////
+			}
 			return 0;
 		} //end func
+		
+		/////////////////////////////////////////
 
 		void FileCreator(const std::string path,
 						const std::string destFileName,
